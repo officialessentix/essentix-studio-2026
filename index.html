@@ -496,16 +496,17 @@
             body: JSON.stringify(orderData)
         });
 
-        if (response.ok) {
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } }); // Party popper [cite: 2026-01-05]
-            alert("ORDER PLACED SUCCESSFULLY!");
-            bag = []; // Bag empty on refresh requirement [cite: 2026-01-05]
-            window.location.reload(); 
-        } else {
-            const data = await response.json();
-            console.error("Vault Response:", data);
-            alert("VAULT REJECTED THE ORDER. Check console for details.");
-        }
+        // Inside your submitOrder() function
+if (response.ok) {
+    // 1. Party Popper! [cite: 2026-01-05]
+    confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } });
+    
+    alert("ORDER PLACED SUCCESSFULLY!");
+    
+    // 2. Empty the bag on page refresh [cite: 2026-01-05]
+    bag = []; 
+    window.location.reload(); 
+}
     } catch (err) {
         console.error("Connection Error:", err);
         alert("CONNECTION ERROR: Is the server running?");
