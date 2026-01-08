@@ -468,7 +468,6 @@
     }
 
    async function submitOrder() {
-    // We target the specific form section to avoid picking up the search bar or promo input by mistake
     const formSection = document.querySelector('.form-section');
     const inputs = formSection.querySelectorAll('input');
     
@@ -478,21 +477,19 @@
         pincode: inputs[2].value,      
         city: inputs[3].value,         
         address: inputs[4].value,      
-        landmark: inputs[5] ? (inputs[5].value || "N/A") : "N/A", // Optional Landmark check
+        landmark: inputs[5].value || "N/A", // Optional field preserved [cite: 2026-01-05]
         items: bag,
-        promoCode: document.getElementById('cp-input').value || "NONE", // Optional Promo
         total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
-        status: "Pending",
-        date: new Date().toISOString()
+        status: "Pending"
     };
 
-    // Compulsory Field Validation
     if (!orderData.customerName || !orderData.email || !orderData.address) {
         alert("PLEASE FILL IN YOUR NAME, EMAIL, AND ADDRESS");
         return;
     }
 
     try {
+        // Ensure this URL matches your Render backend URL exactly
         const response = await fetch('https://essentix-vault.onrender.com/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -500,24 +497,20 @@
         });
 
         if (response.ok) {
-            // Requirement: Party Popper [cite: 2026-01-05]
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } });
-            
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } }); // Party popper [cite: 2026-01-05]
             alert("ORDER PLACED SUCCESSFULLY!");
-            
-            // Requirement: Bag empty on refresh [cite: 2026-01-05]
-            bag = []; 
-            localStorage.removeItem('bag'); // If you use storage
+            bag = []; // Bag empty on refresh requirement [cite: 2026-01-05]
             window.location.reload(); 
         } else {
-            alert("VAULT REJECTED THE ORDER. Ensure your backend is running.");
+            const data = await response.json();
+            console.error("Vault Response:", data);
+            alert("VAULT REJECTED THE ORDER. Check console for details.");
         }
     } catch (err) {
         console.error("Connection Error:", err);
-        alert("CONNECTION ERROR: Is your Render server awake?");
+        alert("CONNECTION ERROR: Is the server running?");
     }
 }
-
 
 </script>
 </body>
