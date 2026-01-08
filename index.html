@@ -466,25 +466,22 @@
         updateTotals();
         window.scrollTo(0,0);
     }
-
-  async function submitOrder() {
+async function submitOrder() {
     const formSection = document.querySelector('.form-section');
     const inputs = formSection.querySelectorAll('input');
     
-    // Mapping specifically to your 6 shipping inputs
     const orderData = {
         customerName: inputs[0].value, 
         email: inputs[1].value,        
         pincode: inputs[2].value,      
         city: inputs[3].value,         
         address: inputs[4].value,      
-        landmark: inputs[5].value || "N/A", // Preserves optional requirement [cite: 2026-01-05]
+        landmark: inputs[5].value || "N/A", // Optional field [cite: 2026-01-05]
         items: bag,
         total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
         status: "Pending"
     };
 
-    // Validation: Only Name, Email, and Address are mandatory
     if (!orderData.customerName || !orderData.email || !orderData.address) {
         alert("PLEASE FILL IN YOUR NAME, EMAIL, AND ADDRESS");
         return;
@@ -498,20 +495,18 @@
         });
 
         if (response.ok) {
-            // Requirement: Party Popper [cite: 2026-01-05]
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } }); 
-            
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } }); // Party Popper [cite: 2026-01-05]
             alert("ORDER PLACED SUCCESSFULLY!");
-            
-            // Requirement: Bag empty on page refresh [cite: 2026-01-05]
-            bag = []; 
+            bag = []; // Clear bag [cite: 2026-01-05]
             window.location.reload(); 
         } else {
-            const data = await response.json();
-            alert("VAULT REJECTED THE DATA. CHECK SERVER LOGS.");
+            const errorText = await response.text();
+            console.error("Server Error:", errorText);
+            alert("VAULT REJECTED THE ORDER. Check if you pushed the latest server.js to Render.");
         }
     } catch (err) {
-        alert("CONNECTION ERROR: Check if your Render server is awake.");
+        console.error("Connection Error:", err);
+        alert("CONNECTION ERROR: Is your Render server awake?");
     }
 }
 
