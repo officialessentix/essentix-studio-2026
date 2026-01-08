@@ -468,24 +468,24 @@
     }
 
    async function submitOrder() {
-    // We select all inputs to find the shipping details
     const inputs = document.querySelectorAll('.s-input');
     
-    // Mapping inputs specifically to avoid index errors
+    // We map the fields precisely. Note: index 0 is the Promo Code input.
     const orderData = {
         customerName: inputs[1].value, // Full Name
         email: inputs[2].value,        // Email
         pincode: inputs[3].value,      // Pincode
         city: inputs[4].value,         // City
         address: inputs[5].value,      // Street Address
-        landmark: inputs[6].value,     // Landmark
+        landmark: inputs[6].value || "N/A", // Landmark (Optional)
         items: bag,
-        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
-        orderDate: new Date().toISOString()
+        promoUsed: document.getElementById('cp-input').value || "NONE", // Promo (Optional)
+        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount
     };
 
+    // Only Name, Email, and Address are compulsory
     if (!orderData.customerName || !orderData.email || !orderData.address) {
-        alert("PLEASE FILL ALL REQUIRED SHIPPING DETAILS");
+        alert("PLEASE FILL IN YOUR NAME, EMAIL, AND ADDRESS");
         return;
     }
 
@@ -497,25 +497,18 @@
         });
 
         if (response.ok) {
-            // Preservation of the Party Popper rule
-            confetti({ 
-                particleCount: 200, 
-                spread: 100, 
-                origin: { y: 0.6 },
-                colors: ['#ff3e3e', '#000000', '#ffffff'] 
-            });
-            
-            alert("ORDER SUCCESSFUL! CHECK THE VAULT.");
-            
-            // Preservation of Bag Empty on Refresh/Order rule
-            bag = []; 
-            window.location.assign('/'); // Redirects to home and clears state
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } }); // Party Popper preserved
+            alert("ORDER PLACED SUCCESSFULLY!");
+            bag = []; // Bag empty on refresh/order preserved
+            window.location.reload(); 
         } else {
-            const errorData = await response.json();
-            alert("SERVER ERROR: " + errorData.message);
+            const errText = await response.text();
+            console.error("Vault Response Error:", errText);
+            alert("VAULT REJECTED DATA: " + errText);
         }
     } catch (err) {
-        alert("VAULT CONNECTION ERROR - CHECK INTERNET");
+        console.error("Connection Error:", err);
+        alert("CONNECTION ERROR: Is the Essentix Vault Server awake?");
     }
 }
 </script>
