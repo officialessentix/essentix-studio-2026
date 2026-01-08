@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ESSENTIX // STUDIO ARCHIVE</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #ffffff; --fg: #000; --accent: #ff3e3e;
+            --radius: 35px; --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; border: none; outline: none; text-decoration: none; }
+        
+        body { background: var(--bg); color: var(--fg); font-family: 'Outfit', sans-serif; font-weight: 300; overflow-x: hidden; }
+        
+        /* HEADER */
+        header { 
+            position: fixed; top: 0; width: 100%; height: 80px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 6%; z-index: 2000; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px);
+        }
+        .hamburger { width: 35px; height: 18px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 3001; }
+        .hamburger span { width: 100%; height: 1.5px; background: #000; }
+        .logo { font-family: 'Syncopate'; font-weight: 700; font-size: 20px; letter-spacing: 5px; cursor: pointer; }
+        .bag-trigger { font-weight: 400; font-size: 13px; letter-spacing: 1px; cursor: pointer; }
+
+        /* NAV MENU */
+        #menu-overlay { position: fixed; inset: 0; background: #fff; z-index: 3000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .menu-link { font-size: 32px; font-weight: 300; margin: 15px 0; letter-spacing: -1px; cursor: pointer; }
+
+        /* HERO */
+        .hero { 
+            height: 100vh; width: 100%; position: relative; display: flex; align-items: center; justify-content: center;
+            background: #f4f4f4 url('https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1500') center/cover;
+            margin-bottom: 20px;
+        }
+        .hero-content { z-index: 10; color: #fff; text-align: center; }
+        .hero h1 { font-family: 'Syncopate'; font-size: 12vw; font-weight: 700; }
+        .hero p { font-weight: 300; font-size: 11px; margin-top: 15px; letter-spacing: 10px; text-transform: uppercase; }
+
+        /* UTILITY BAR */
+        .utility-bar { padding: 40px 6% 0; display: grid; grid-template-columns: 1fr auto; gap: 15px; }
+        .s-bar { padding: 18px 25px; background: #f9f9f9; border-radius: 50px; font-family: 'Outfit'; font-size: 14px; width: 100%; transition: 0.3s; }
+        .s-bar:focus { background: #fff; box-shadow: 0 0 0 1px #000; }
+        .sort-sel { padding: 18px 20px; background: #f9f9f9; border-radius: 50px; font-family: 'Outfit'; font-size: 12px; font-weight: 500; cursor: pointer; }
+
+        /* PRODUCT GRIDS */
+        .container { padding: 0 6% 100px; }
+        .section-label { font-weight: 500; font-size: 14px; margin: 80px 0 30px; letter-spacing: 2px; color: #888; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 30px; } }
+
+        .card { cursor: pointer; position: relative; transition: transform 0.4s var(--ease); }
+        .img-box { aspect-ratio: 3/4; overflow: hidden; background: #f9f9f9; border-radius: var(--radius); margin-bottom: 15px; position: relative; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .wish-btn { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s; }
+        .wish-btn.active { color: var(--accent); }
+
+        /* INCREASED VISIBILITY FOR PHONE */
+        .p-name { font-size: 18px; font-weight: 500; display: block; letter-spacing: -0.5px; }
+        .p-price { font-size: 20px; font-weight: 600; margin-top: 6px; display: block; color: var(--fg); }
+
+        /* CONTACT SUPPORT SECTION */
+        .contact-section { padding: 100px 6%; background: #fff; border-top: 1px solid #eee; }
+        .contact-grid { display: grid; grid-template-columns: 1fr; gap: 50px; }
+        @media (min-width: 768px) { .contact-grid { grid-template-columns: 1fr 1fr; } }
+        .contact-info h2 { font-family: 'Syncopate'; font-size: 22px; margin-bottom: 15px; }
+        .contact-info p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 30px; }
+        .wa-btn { display: inline-flex; align-items: center; gap: 10px; background: #25D366; color: #fff; padding: 15px 25px; border-radius: 50px; font-weight: 500; font-size: 12px; letter-spacing: 1px; }
+        .c-form input, .c-form textarea { width: 100%; padding: 18px; background: #f9f9f9; border-radius: 15px; margin-bottom: 15px; font-family: 'Outfit'; border: 1px solid transparent; }
+        .c-form input:focus, .c-form textarea:focus { background: #fff; border-color: #000; }
+
+        /* QUICK VIEW MODAL */
+        #qv-modal { position: fixed; inset: 0; background: #fff; z-index: 4000; display: none; padding: 40px 6%; overflow-y: auto; }
+        .qv-layout { display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 40px; }
+        @media (min-width: 768px) { .qv-layout { grid-template-columns: 1fr 1fr; } }
+        
+        .size-btn { border: 1px solid #ddd; padding: 15px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .size-btn.active { background: #000; color: #fff; border-color: #000; }
+        .size-guide-link { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; cursor: pointer; display: block; margin-bottom: 15px; }
+
+        .detail-row { border-top: 1px solid #eee; padding: 20px 0; cursor: pointer; }
+        .detail-header { display: flex; justify-content: space-between; font-weight: 500; font-size: 12px; letter-spacing: 1px; }
+        .detail-body { display: none; padding-top: 15px; font-size: 14px; color: #666; line-height: 1.6; }
+        .detail-row.active .detail-body { display: block; }
+
+        /* SIZE GUIDE MODAL */
+        #sg-modal { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .sg-content { background: #fff; width: 100%; max-width: 500px; padding: 40px; border-radius: var(--radius); border: 1px solid #eee; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .sg-table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+        .sg-table th, .sg-table td { text-align: left; padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+
+        /* TRACK ORDER SECTION */
+        .track-section { padding: 80px 6%; background: #000; color: #fff; text-align: center; }
+        .track-box { max-width: 400px; margin: 30px auto 0; }
+        .track-input { width: 100%; padding: 18px; border-radius: 50px; background: #222; color: #fff; font-family: 'Outfit'; margin-bottom: 15px; text-align: center; }
+        #track-status { font-size: 12px; letter-spacing: 1px; margin-top: 15px; color: #888; display: none; }
+
+        /* BAG & CHECKOUT */
+        #bag-sidebar { position: fixed; inset: 0; left: auto; right: -100%; width: 100%; background: #fff; z-index: 5000; transition: 0.5s var(--ease); padding: 100px 6% 40px; display: flex; flex-direction: column; }
+        #bag-sidebar.open { right: 0; }
+        .qty-ctrl { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .qty-btn { width: 30px; height: 30px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        #checkout-view { display: none; padding: 120px 6% 100px; }
+        .bill-card { background: #fafafa; padding: 45px; border-radius: var(--radius); margin-bottom: 50px; border: 1px solid #f0f0f0; }
+        .bill-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
+        .split-layout { display: grid; grid-template-columns: 1fr; gap: 60px; }
+        @media (min-width: 1024px) { .split-layout { grid-template-columns: 1.2fr 0.8fr; } }
+        .s-input { width: 100%; padding: 22px; background: #f9f9f9; border-radius: 18px; margin-bottom: 15px; font-family: 'Outfit'; font-size: 14px; }
+        .btn-black { background: #000; color: #fff; width: 100%; padding: 24px; font-weight: 500; font-size: 13px; border-radius: 50px; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: 0.2s; position: relative; }
+
+        /* NEWSLETTER */
+        .newsletter { padding: 100px 6%; background: #fdfdfd; text-align: center; border-top: 1px solid #eee; }
+        .newsletter h2 { font-family: 'Syncopate'; font-size: 24px; margin-bottom: 20px; }
+        .nl-form { max-width: 500px; margin: 0 auto; display: flex; gap: 10px; }
+        .nl-input { flex: 1; padding: 18px; border-radius: 50px; background: #f4f4f4; font-family: 'Outfit'; }
+
+        /* NAVIGATION */
+        .mag-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); padding: 8px 15px; border-radius: 100px; display: flex; z-index: 1500; border: 1px solid rgba(255,255,255,0.1); }
+        .mag-btn { color: #fff; font-weight: 400; font-size: 9px; font-family: 'Syncopate'; padding: 10px 18px; background: none; cursor: pointer; }
+        
+        footer { padding: 80px 6%; background: #fff; border-top: 1px solid #eee; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hamburger" onclick="toggleMenu(true)"><span></span><span></span></div>
+    <div class="logo" onclick="window.location.reload()">ESSENTIX</div>
+    <div class="bag-trigger" onclick="toggleBag(true)">BAG (<span id="bag-count">0</span>)</div>
+</header>
+
+<div id="menu-overlay">
+    <div class="menu-link" onclick="toggleMenu(false); document.getElementById('s1').scrollIntoView();">SHIRTING</div>
+    <div class="menu-link" onclick="toggleMenu(false); document.getElementById('s2').scrollIntoView();">JERSEY</div>
+    <div class="menu-link" onclick="toggleMenu(false); document.getElementById('s3').scrollIntoView();">OUTERWEAR</div>
+    <div class="menu-link" onclick="toggleMenu(false); document.getElementById('contact-us').scrollIntoView();">SUPPORT</div>
+    <div class="menu-link" onclick="toggleMenu(false)">CLOSE</div>
+</div>
+
+<div id="home-view">
+    <section class="hero"><div class="hero-content"><h1>ESSENTIX</h1><p>Archive Studio 2026</p></div></section>
+    
+    <div class="utility-bar">
+        <input type="text" class="s-bar" placeholder="SEARCH ARCHIVE..." onkeyup="searchItems(this.value)">
+        <select class="sort-sel" onchange="sortData(this.value)">
+            <option value="default">SORT</option>
+            <option value="low">PRICE LOW</option>
+            <option value="high">PRICE HIGH</option>
+        </select>
+    </div>
+<!-- 
+    <div class="container">
+        <div id="s1" class="section-label">01 / SHIRTS</div><div id="grid-shirts" class="grid"></div>
+        <div id="s2" class="section-label">02 / TEES</div><div id="grid-tees" class="grid"></div>
+        <div id="s3" class="section-label">03 / SWEATS</div><div id="grid-sweats" class="grid"></div>
+    </div> -->
+<div class="container">
+    <div id="s1" class="section-label">01 / SHIRTS</div>
+    <div id="grid-shirts" class="grid"></div> <div id="s2" class="section-label">02 / TEES</div>
+    <div id="grid-tees" class="grid"></div> <div id="s3" class="section-label">03 / SWEATS</div>
+    <div id="grid-sweats" class="grid"></div> </div>
+
+    <section id="contact-us" class="contact-section">
+        <div class="contact-grid">
+            <div class="contact-info">
+                <h2>STUDIO SUPPORT</h2>
+                <p>Have questions about a specific archive piece or your current shipment? Reach out to our concierge team.</p>
+                <a href="https://wa.me/1234567890" class="wa-btn">WHATSAPP CHAT</a>
+                <div style="margin-top:40px; font-size:12px; color:#888;">
+                    <p>Mon - Fri: 10am to 7pm</p>
+                    <p>Sat - Sun: 11am to 4pm</p>
+                </div>
+            </div>
+            <div class="c-form">
+                <input type="text" id="c-name" placeholder="Name">
+                <input type="email" id="c-email" placeholder="Email">
+                <textarea id="c-msg" rows="4" placeholder="Your Message..."></textarea>
+                <button class="btn-black" onclick="sendSupport()">SEND MESSAGE</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="track-section">
+        <h2 style="font-family:'Syncopate'; font-size:18px;">TRACK YOUR ARCHIVE</h2>
+        <div class="track-box">
+            <input type="text" id="track-id" class="track-input" placeholder="ORDER ID (EX2026)">
+            <button class="btn-black" style="background:#fff; color:#000; padding:15px; font-size:10px;" onclick="trackOrder()">TRACK STATUS</button>
+            <p id="track-status"></p>
+        </div>
+    </section>
+
+    <section class="newsletter">
+        <h2>JOIN THE ARCHIVE</h2>
+        <p style="font-size:14px; color:#666; margin:20px 0 40px;">Get early access to Studio Drops and 2026 Collections.</p>
+        <div class="nl-form">
+            <input type="email" class="nl-input" placeholder="Email Address">
+            <button class="btn-black" style="padding: 15px 30px; font-size: 10px;" onclick="alert('Subscribed!')">JOIN</button>
+        </div>
+    </section>
+</div>
+
+<div id="qv-modal">
+    <div style="font-weight:400; font-size:12px; cursor:pointer;" onclick="toggleQV(false)">[ RETURN ]</div>
+    <div class="qv-layout">
+        <div class="img-box"><img id="qv-img" src=""></div>
+        <div>
+            <h2 id="qv-name" style="font-size:32px; font-weight:500;"></h2>
+            <p id="qv-price" style="font-size:22px; font-weight:600; margin:10px 0;"></p>
+            <span class="size-guide-link" onclick="toggleSG(true)">SIZE GUIDE +</span>
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:20px 0 30px;">
+                <div class="size-btn" onclick="selectSize(this, 'S')">S</div>
+                <div class="size-btn" onclick="selectSize(this, 'M')">M</div>
+                <div class="size-btn" onclick="selectSize(this, 'L')">L</div>
+                <div class="size-btn" onclick="selectSize(this, 'XL')">XL</div>
+            </div>
+            <div class="detail-row" onclick="this.classList.toggle('active')"><div class="detail-header">DESCRIPTION <span>+</span></div><div class="detail-body">Architectural silhouette with dropped shoulders. Perfect for 2026 Archive looks.</div></div>
+            <div class="detail-row" onclick="this.classList.toggle('active')"><div class="detail-header">MATERIAL <span>+</span></div><div class="detail-body">100% Heavyweight Cotton. Sourced ethically.</div></div>
+            <div class="detail-row" onclick="this.classList.toggle('active')"><div class="detail-header">CARE <span>+</span></div><div class="detail-body">Machine wash cold. Do not tumble dry.</div></div>
+            <button class="btn-black" id="add-to-bag-btn" style="margin-top:40px;" onclick="addToBag()">ADD TO BAG</button>
+        </div>
+    </div>
+</div>
+
+<div id="sg-modal">
+    <div class="sg-content">
+        <div style="display:flex; justify-content:space-between;">
+            <h3 style="font-family:'Syncopate'; font-size:14px;">SIZE CHART</h3>
+            <span style="cursor:pointer; font-size:12px;" onclick="toggleSG(false)">[ X ]</span>
+        </div>
+        <table class="sg-table">
+            <thead><tr><th>SIZE</th><th>CHEST</th><th>LENGTH</th></tr></thead>
+            <tbody>
+                <tr><td>S</td><td>21"</td><td>27"</td></tr>
+                <tr><td>M</td><td>22"</td><td>28"</td></tr>
+                <tr><td>L</td><td>23"</td><td>29"</td></tr>
+                <tr><td>XL</td><td>24"</td><td>30"</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:11px; color:#888;">* Measurements are taken flat in inches.</p>
+    </div>
+</div>
+
+<div id="bag-sidebar">
+    <div style="display:flex; justify-content:space-between; margin-bottom:40px; font-family:'Syncopate'; font-size:12px;"><span>YOUR BAG</span><span onclick="toggleBag(false)" style="cursor:pointer;">CLOSE</span></div>
+    <div id="bag-list" style="flex:1; overflow-y:auto;"></div>
+    <button class="btn-black" onclick="showCheckout()" style="margin-top:20px;">PROCEED TO CHECKOUT</button>
+</div>
+
+<div id="checkout-view">
+    <div class="bill-card">
+        <h3>INVOICE SUMMARY</h3>
+        <div id="bill-items"></div>
+        <div class="bill-row"><span>SUBTOTAL</span><span id="c-sub">₹0</span></div>
+        <div class="bill-row" id="disc-row" style="display:none; color:var(--accent);"><span>COUPON DISCOUNT</span><span id="c-disc">-₹0</span></div>
+        <div class="bill-row"><span>DELIVERY</span><span>₹150</span></div>
+        <div class="bill-row" style="font-size:28px; font-weight:600; border-top:1px solid #000; padding-top:20px;"><span>TOTAL</span><span id="c-total">₹0</span></div>
+    </div>
+    <div class="split-layout">
+        <div class="form-section">
+            <h4 style="margin-bottom:20px; color:#888;">SHIPPING DETAILS</h4>
+            <input type="text" class="s-input" placeholder="Full Name">
+            <input type="email" class="s-input" placeholder="Email Address">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <input type="text" class="s-input" placeholder="Pincode">
+                <input type="text" class="s-input" placeholder="City">
+            </div>
+            <input type="text" class="s-input" placeholder="Street Address / House No.">
+            <input type="text" class="s-input" placeholder="Landmark (Optional)">
+        </div>
+        <div>
+            <div style="padding:30px; background:#f9f9f9; border-radius:25px;">
+                <input type="text" id="cp-input" class="s-input" style="background:#fff;" placeholder="PROMO CODE (ESSENTIX10)">
+                <button class="btn-black" style="padding:15px; font-size:11px;" onclick="applyPromo()">APPLY</button>
+            </div>
+            <button class="btn-black" style="margin-top:40px; background:var(--accent);">PLACE ORDER</button>
+        </div>
+    </div>
+</div>
+
+<nav class="mag-nav">
+    <div class="mag-btn" onclick="document.getElementById('s1').scrollIntoView()">SHIRTS</div>
+    <div class="mag-btn" onclick="document.getElementById('s2').scrollIntoView()">JERSEY</div>
+    <div class="mag-btn" onclick="document.getElementById('s3').scrollIntoView()">OUTER</div>
+</nav>
+
+<footer>
+    <div class="logo">ESSENTIX</div>
+    <p style="font-size: 10px; margin-top: 20px; opacity: 0.5;">© 2026 ARCHIVE STUDIO. ALL RIGHTS RESERVED.</p>
+</footer>
+
+<script>
+    // Requirement: Connect to Live Vault
+    let LIVE_DATA = { shirts: [], tees: [], sweats: [] };
+    let bag = []; let cur = null; let discount = 0;
+
+    async function fetchArchive() {
+    try {
+        const response = await fetch('https://essentix-vault.onrender.com/api/products');
+        const data = await response.json();
+        
+        // We filter by these EXACT lowercase names
+        LIVE_DATA.shirts = data.filter(p => p.category === 'shirts').slice(0, 10);
+        LIVE_DATA.tees = data.filter(p => p.category === 'tees').slice(0, 10);
+        LIVE_DATA.sweats = data.filter(p => p.category === 'sweats').slice(0, 10);
+        
+        renderGrids();
+        initMagnetic(); 
+    } catch (err) {
+        console.error("Vault Error");
+    }
+}
+
+    function initMagnetic() {
+    // This targets your black buttons, nav buttons, and the new product cards
+    document.querySelectorAll('.btn-black, .mag-btn, .card').forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width/2) * 0.2;
+            const y = (e.clientY - r.top - r.height/2) * 0.2;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        btn.addEventListener('mouseleave', () => btn.style.transform = 'translate(0,0)');
+    });
+}
+
+    function renderGrids(f = "") {
+    // Defines the order of display on the page
+    const order = ['shirts', 'tees', 'sweats'];
+    
+    order.forEach(cat => {
+        const list = LIVE_DATA[cat].filter(x => x.name.toLowerCase().includes(f.toLowerCase()));
+        
+        // Connects data keys to your HTML Grid IDs
+        const gridId = cat === 'shirts' ? 'grid-shirts' : (cat === 'tees' ? 'grid-tees' : 'grid-sweats');
+        const container = document.getElementById(gridId);
+        
+        if (container) {
+            container.innerHTML = list.map(p => `
+                <div class="card">
+                    <div class="wish-btn" onclick="event.stopPropagation(); this.classList.toggle('active')">❤</div>
+                    <div onclick="openQV('${cat}', '${p._id}')">
+                        <div class="img-box"><img src="${p.image}"></div>
+                        <span class="p-name">${p.name}</span>
+                        <span class="p-price">₹${p.price}</span>
+                    </div>
+                </div>`).join('');
+        }
+    });
+}
+    function sendSupport() {
+        const n = document.getElementById('c-name').value;
+        const e = document.getElementById('c-email').value;
+        if(!n || !e) { alert('PLEASE FILL ALL FIELDS'); return; }
+        alert(`Thank you ${n}, we have received your request and will contact you at ${e}.`);
+        document.getElementById('c-name').value = '';
+        document.getElementById('c-email').value = '';
+        document.getElementById('c-msg').value = '';
+    }
+
+    function searchItems(v) { renderGrids(v); }
+    
+    function sortData(v) {
+        ['shirts','tees','sweats'].forEach(c => {
+            if(v==='low') LIVE_DATA[c].sort((a,b)=>a.price-b.price);
+            if(v==='high') LIVE_DATA[c].sort((a,b)=>b.price-a.price);
+        });
+        renderGrids();
+    }
+
+    function applyPromo() {
+        if(document.getElementById('cp-input').value.toUpperCase() === 'ESSENTIX10') {
+            discount = 500; alert('₹500 DISCOUNT APPLIED!'); updateTotals();
+        } else { alert('INVALID CODE'); }
+    }
+
+    function trackOrder() {
+        const id = document.getElementById('track-id').value;
+        const status = document.getElementById('track-status');
+        status.style.display = 'block';
+        if(id.toUpperCase() === 'EX2026') {
+            status.innerHTML = "STATUS: <span style='color:#0f0'>IN TRANSIT - EXPECTED TOMORROW</span>";
+        } else {
+            status.innerHTML = "STATUS: <span style='color:var(--accent)'>ORDER ID NOT FOUND</span>";
+        }
+    }
+
+    function updateTotals() {
+        let sub = bag.reduce((a,b)=> a + (b.price * b.qty), 0);
+        document.getElementById('c-sub').innerText = `₹${sub}`;
+        if(discount > 0) {
+            document.getElementById('disc-row').style.display = 'flex';
+            document.getElementById('c-disc').innerText = `-₹${discount}`;
+        }
+        document.getElementById('c-total').innerText = `₹${sub + 150 - discount}`;
+    }
+
+    // REQUIREMENT: BAG EMPTY ON REFRESH & MAGNET BUTTONS
+    window.onload = () => {
+    bag = []; // Preserve requirement: Empty on refresh
+    fetchArchive();
+};
+
+    function toggleMenu(s) { document.getElementById('menu-overlay').style.display = s ? 'flex' : 'none'; }
+    function toggleBag(s) { document.getElementById('bag-sidebar').classList.toggle('open', s); }
+    function toggleQV(s) { document.getElementById('qv-modal').style.display = s ? 'block' : 'none'; }
+    function toggleSG(s) { document.getElementById('sg-modal').style.display = s ? 'flex' : 'none'; }
+
+    function openQV(cat, id) {
+        const product = LIVE_DATA[cat].find(x => x._id === id);
+        cur = { ...product, qty: 1 };
+        document.getElementById('qv-img').src = cur.image;
+        document.getElementById('qv-name').innerText = cur.name;
+        document.getElementById('qv-price').innerText = `₹${cur.price}`;
+        toggleQV(true);
+    }
+
+    function selectSize(el, s) {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active'); cur.size = s;
+    }
+
+    function addToBag() {
+        if(!cur.size) { alert('CHOOSE SIZE'); return; }
+        const ex = bag.find(x => x._id === cur._id && x.size === cur.size);
+        if(ex) ex.qty++; else bag.push({...cur});
+        
+        // REQUIREMENT: PARTY POPPER
+        confetti({ 
+            particleCount: 150, 
+            origin: { y: 0.8 }, 
+            colors: ['#000', '#ff3e3e', '#ffffff'],
+            spread: 70
+        });
+        
+        updateBag(); toggleQV(false); toggleBag(true);
+    }
+
+    function updateBag() {
+        document.getElementById('bag-count').innerText = bag.reduce((a,b)=>a+b.qty,0);
+        document.getElementById('bag-list').innerHTML = bag.map((it, i) => `
+            <div style="display:flex; gap:15px; padding:20px 0; border-bottom:1px solid #f0f0f0;">
+                <div style="flex:1;">
+                    <div style="font-weight:500; font-size:16px;">${it.name}</div>
+                    <div style="font-size:12px; color:#888; margin-top:2px;">SIZE: ${it.size} | PRICE: ₹${it.price}</div>
+                    <div class="qty-ctrl"><div class="qty-btn" onclick="changeQty(${i},-1)">-</div><span>${it.qty}</span><div class="qty-btn" onclick="changeQty(${i},1)">+</div></div>
+                </div>
+                <div style="font-weight:600; font-size:16px;">₹${it.price * it.qty}</div>
+            </div>`).join('');
+    }
+
+    function changeQty(i, d) { bag[i].qty += d; if(bag[i].qty < 1) bag.splice(i, 1); updateBag(); }
+
+    function showCheckout() {
+        if(bag.length === 0) return;
+        toggleBag(false); 
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('checkout-view').style.display = 'block';
+        document.getElementById('bill-items').innerHTML = bag.map(it => `<div class="bill-row"><span>${it.name} (x${it.qty})</span><span>₹${it.price * it.qty}</span></div>`).join('');
+        updateTotals();
+        window.scrollTo(0,0);
+    }
+</script>
+</body>
+</html>
