@@ -279,7 +279,7 @@
                 <input type="text" id="cp-input" class="s-input" style="background:#fff;" placeholder="PROMO CODE (ESSENTIX10)">
                 <button class="btn-black" style="padding:15px; font-size:11px;" onclick="applyPromo()">APPLY</button>
             </div>
-            <button id="final-order-btn" class="btn-black" style="margin-top:40px; background:var(--accent);" onclick="submitOrder()">PLACE ORDER</button>
+            <button class="btn-black" style="margin-top:40px; background:var(--accent);" onclick="submitOrder()">PLACE ORDER</button>
         </div>
     </div>
 </div>
@@ -468,20 +468,19 @@
     }
 
     async function submitOrder() {
-    // 1. Collect user data from your inputs
     const inputs = document.querySelectorAll('.s-input');
     const orderData = {
-        customerName: inputs[1].value, // Full Name
-        email: inputs[2].value,        // Email
-        pincode: inputs[3].value,      // Pincode
-        city: inputs[4].value,         // City
-        address: inputs[5].value,      // Street Address
-        items: bag,                    // Current Bag Items
+        name: inputs[1].value, 
+        email: inputs[2].value,
+        pincode: inputs[3].value,
+        city: inputs[4].value,
+        address: inputs[5].value,
+        items: bag,
         total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount
     };
 
-    if (!orderData.customerName || !orderData.email) {
-        alert("PLEASE FILL IN YOUR SHIPPING DETAILS");
+    if (!orderData.name || !orderData.email) {
+        alert("PLEASE FILL ALL SHIPPING DETAILS");
         return;
     }
 
@@ -493,16 +492,13 @@
         });
 
         if (response.ok) {
-            // Preservation of Party Popper Requirement
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            alert("ORDER PLACED SUCCESSFULLY!");
-            
-            // Preservation of Bag Empty Requirement
-            bag = []; 
-            window.location.reload(); 
+            confetti({ particleCount: 150, spread: 70 }); // Party popper preserved
+            alert("ORDER PLACED!");
+            bag = []; // Bag empty on refresh/order preserved
+            window.location.reload();
         }
     } catch (err) {
-        alert("VAULT CONNECTION ERROR");
+        alert("CONNECTION ERROR");
     }
 }
 </script>
