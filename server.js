@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ ESSENTIX VAULT ONLINE"))
     .catch(err => console.error("❌ VAULT CONNECTION ERROR:", err));
 
-// 2. DEFINE THE ORDER MODEL (Ensures Landmark is Optional [cite: 2026-01-05])
+// 2. DEFINE THE ORDER MODEL (Ensures Landmark is Optional) [cite: 2026-01-05]
 const Order = mongoose.model('Order', new mongoose.Schema({
     customerName: String,
     email: String,
@@ -29,7 +29,7 @@ const Order = mongoose.model('Order', new mongoose.Schema({
 }));
 
 // 3. API ROUTES
-// This fetches your 30 items for the 10-item grids [cite: 2026-01-04]
+// Fetches the 30 products for your grid sections [cite: 2026-01-04]
 app.get('/api/products', async (req, res) => {
     try {
         const items = await Product.find();
@@ -39,7 +39,7 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// THIS FIXES THE "CANNOT POST" ERROR
+// Receives orders from the frontend
 app.post('/api/orders', async (req, res) => {
     try {
         const newOrder = new Order(req.body);
