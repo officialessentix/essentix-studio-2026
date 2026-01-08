@@ -468,24 +468,25 @@
     }
 
    async function submitOrder() {
+    // We target the specific form section to avoid picking up the search bar or promo input by mistake
     const formSection = document.querySelector('.form-section');
     const inputs = formSection.querySelectorAll('input');
     
-    // Explicitly mapping fields to avoid index errors with optional Landmark
     const orderData = {
         customerName: inputs[0].value, 
         email: inputs[1].value,        
         pincode: inputs[2].value,      
         city: inputs[3].value,         
         address: inputs[4].value,      
-        landmark: inputs[5].value || "N/A", // Optional field preserved
+        landmark: inputs[5] ? (inputs[5].value || "N/A") : "N/A", // Optional Landmark check
         items: bag,
+        promoCode: document.getElementById('cp-input').value || "NONE", // Optional Promo
         total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
         status: "Pending",
-        orderDate: new Date().toISOString()
+        date: new Date().toISOString()
     };
 
-    // Validation for compulsory fields only
+    // Compulsory Field Validation
     if (!orderData.customerName || !orderData.email || !orderData.address) {
         alert("PLEASE FILL IN YOUR NAME, EMAIL, AND ADDRESS");
         return;
@@ -499,19 +500,21 @@
         });
 
         if (response.ok) {
-            // Party Popper requirement
+            // Requirement: Party Popper [cite: 2026-01-05]
             confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } });
+            
             alert("ORDER PLACED SUCCESSFULLY!");
+            
+            // Requirement: Bag empty on refresh [cite: 2026-01-05]
             bag = []; 
+            localStorage.removeItem('bag'); // If you use storage
             window.location.reload(); 
         } else {
-            // Error handling for the "Cannot POST" issue
-            const errorMsg = await response.text();
-            console.error("Vault Error:", errorMsg);
-            alert("VAULT ERROR: THE SERVER REJECTED THE ORDER ROUTE.");
+            alert("VAULT REJECTED THE ORDER. Ensure your backend is running.");
         }
     } catch (err) {
-        alert("CONNECTION ERROR: CHECK BACKEND LOGS.");
+        console.error("Connection Error:", err);
+        alert("CONNECTION ERROR: Is your Render server awake?");
     }
 }
 
