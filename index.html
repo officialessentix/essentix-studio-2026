@@ -468,22 +468,24 @@
     }
 
    async function submitOrder() {
-    const inputs = document.querySelectorAll('.s-input');
+    const formSection = document.querySelector('.form-section');
+    const inputs = formSection.querySelectorAll('input');
     
-    // We map the fields precisely. Note: index 0 is the Promo Code input.
+    // Explicitly mapping fields to avoid index errors with optional Landmark
     const orderData = {
-        customerName: inputs[1].value, // Full Name
-        email: inputs[2].value,        // Email
-        pincode: inputs[3].value,      // Pincode
-        city: inputs[4].value,         // City
-        address: inputs[5].value,      // Street Address
-        landmark: inputs[6].value || "N/A", // Landmark (Optional)
+        customerName: inputs[0].value, 
+        email: inputs[1].value,        
+        pincode: inputs[2].value,      
+        city: inputs[3].value,         
+        address: inputs[4].value,      
+        landmark: inputs[5].value || "N/A", // Optional field preserved
         items: bag,
-        promoUsed: document.getElementById('cp-input').value || "NONE", // Promo (Optional)
-        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount
+        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
+        status: "Pending",
+        orderDate: new Date().toISOString()
     };
 
-    // Only Name, Email, and Address are compulsory
+    // Validation for compulsory fields only
     if (!orderData.customerName || !orderData.email || !orderData.address) {
         alert("PLEASE FILL IN YOUR NAME, EMAIL, AND ADDRESS");
         return;
@@ -497,20 +499,23 @@
         });
 
         if (response.ok) {
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } }); // Party Popper preserved
+            // Party Popper requirement
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } });
             alert("ORDER PLACED SUCCESSFULLY!");
-            bag = []; // Bag empty on refresh/order preserved
+            bag = []; 
             window.location.reload(); 
         } else {
-            const errText = await response.text();
-            console.error("Vault Response Error:", errText);
-            alert("VAULT REJECTED DATA: " + errText);
+            // Error handling for the "Cannot POST" issue
+            const errorMsg = await response.text();
+            console.error("Vault Error:", errorMsg);
+            alert("VAULT ERROR: THE SERVER REJECTED THE ORDER ROUTE.");
         }
     } catch (err) {
-        console.error("Connection Error:", err);
-        alert("CONNECTION ERROR: Is the Essentix Vault Server awake?");
+        alert("CONNECTION ERROR: CHECK BACKEND LOGS.");
     }
 }
+
+
 </script>
 </body>
 </html>
