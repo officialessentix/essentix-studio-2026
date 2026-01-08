@@ -467,20 +467,25 @@
         window.scrollTo(0,0);
     }
 
-    async function submitOrder() {
+   async function submitOrder() {
+    // We select all inputs to find the shipping details
     const inputs = document.querySelectorAll('.s-input');
+    
+    // Mapping inputs specifically to avoid index errors
     const orderData = {
-        name: inputs[1].value, 
-        email: inputs[2].value,
-        pincode: inputs[3].value,
-        city: inputs[4].value,
-        address: inputs[5].value,
+        customerName: inputs[1].value, // Full Name
+        email: inputs[2].value,        // Email
+        pincode: inputs[3].value,      // Pincode
+        city: inputs[4].value,         // City
+        address: inputs[5].value,      // Street Address
+        landmark: inputs[6].value,     // Landmark
         items: bag,
-        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount
+        total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
+        orderDate: new Date().toISOString()
     };
 
-    if (!orderData.name || !orderData.email) {
-        alert("PLEASE FILL ALL SHIPPING DETAILS");
+    if (!orderData.customerName || !orderData.email || !orderData.address) {
+        alert("PLEASE FILL ALL REQUIRED SHIPPING DETAILS");
         return;
     }
 
@@ -492,13 +497,25 @@
         });
 
         if (response.ok) {
-            confetti({ particleCount: 150, spread: 70 }); // Party popper preserved
-            alert("ORDER PLACED!");
-            bag = []; // Bag empty on refresh/order preserved
-            window.location.reload();
+            // Preservation of the Party Popper rule
+            confetti({ 
+                particleCount: 200, 
+                spread: 100, 
+                origin: { y: 0.6 },
+                colors: ['#ff3e3e', '#000000', '#ffffff'] 
+            });
+            
+            alert("ORDER SUCCESSFUL! CHECK THE VAULT.");
+            
+            // Preservation of Bag Empty on Refresh/Order rule
+            bag = []; 
+            window.location.assign('/'); // Redirects to home and clears state
+        } else {
+            const errorData = await response.json();
+            alert("SERVER ERROR: " + errorData.message);
         }
     } catch (err) {
-        alert("CONNECTION ERROR");
+        alert("VAULT CONNECTION ERROR - CHECK INTERNET");
     }
 }
 </script>
