@@ -296,19 +296,20 @@
 </footer>
 
 <script>
-    // Requirement: Connect to Live Vault
-    let LIVE_DATA = { shirts: [], tees: [], sweats: [] };
-    let bag = []; let cur = null; let discount = 0;
+let LIVE_DATA = { shirts: [], tees: [], sweats: [] };
+let bag = [];
+let cur = null;
+let discount = 0;
 
-    async function fetchArchive() {
+async function fetchArchive() {
     try {
         const response = await fetch('https://essentix-backend.onrender.com/api/products');
         const data = await response.json();
 
-        // ✅ MATCH BACKEND CATEGORY VALUES
-        LIVE_DATA.shirts = data.filter(p => p.category === 'shirt');
-        LIVE_DATA.tees   = data.filter(p => p.category === 'tee');
-        LIVE_DATA.sweats = data.filter(p => p.category === 'sweat');
+        // Filter by category and slice to 10 items each
+        LIVE_DATA.shirts = data.filter(p => p.category === 'shirts').slice(0, 10);
+        LIVE_DATA.tees   = data.filter(p => p.category === 'tees').slice(0, 10);
+        LIVE_DATA.sweats = data.filter(p => p.category === 'sweats').slice(0, 10);
 
         renderGrids();
         initMagnetic();
@@ -317,9 +318,7 @@
     }
 }
 
-
-    function initMagnetic() {
-    // This targets your black buttons, nav buttons, and the new product cards
+function initMagnetic() {
     document.querySelectorAll('.btn-black, .mag-btn, .card').forEach(btn => {
         btn.addEventListener('mousemove', (e) => {
             const r = btn.getBoundingClientRect();
@@ -331,17 +330,15 @@
     });
 }
 
-    function renderGrids(f = "") {
-    // Defines the order of display on the page
+function renderGrids(f = "") {
     const order = ['shirts', 'tees', 'sweats'];
-    
+
     order.forEach(cat => {
         const list = LIVE_DATA[cat].filter(x => x.name.toLowerCase().includes(f.toLowerCase()));
-        
-        // Connects data keys to your HTML Grid IDs
+
         const gridId = cat === 'shirts' ? 'grid-shirts' : (cat === 'tees' ? 'grid-tees' : 'grid-sweats');
         const container = document.getElementById(gridId);
-        
+
         if (container) {
             container.innerHTML = list.map(p => `
                 <div class="card">
@@ -355,119 +352,112 @@
         }
     });
 }
-    function sendSupport() {
-        const n = document.getElementById('c-name').value;
-        const e = document.getElementById('c-email').value;
-        if(!n || !e) { alert('PLEASE FILL ALL FIELDS'); return; }
-        alert(`Thank you ${n}, we have received your request and will contact you at ${e}.`);
-        document.getElementById('c-name').value = '';
-        document.getElementById('c-email').value = '';
-        document.getElementById('c-msg').value = '';
-    }
 
-    function searchItems(v) { renderGrids(v); }
-    
-    function sortData(v) {
-        ['shirts','tees','sweats'].forEach(c => {
-            if(v==='low') LIVE_DATA[c].sort((a,b)=>a.price-b.price);
-            if(v==='high') LIVE_DATA[c].sort((a,b)=>b.price-a.price);
-        });
-        renderGrids();
-    }
+function sendSupport() {
+    const n = document.getElementById('c-name').value;
+    const e = document.getElementById('c-email').value;
+    if(!n || !e) { alert('PLEASE FILL ALL FIELDS'); return; }
+    alert(`Thank you ${n}, we have received your request and will contact you at ${e}.`);
+    document.getElementById('c-name').value = '';
+    document.getElementById('c-email').value = '';
+    document.getElementById('c-msg').value = '';
+}
 
-    function applyPromo() {
-        if(document.getElementById('cp-input').value.toUpperCase() === 'ESSENTIX10') {
-            discount = 500; alert('₹500 DISCOUNT APPLIED!'); updateTotals();
-        } else { alert('INVALID CODE'); }
-    }
+function searchItems(v) { renderGrids(v); }
 
-    function trackOrder() {
-        const id = document.getElementById('track-id').value;
-        const status = document.getElementById('track-status');
-        status.style.display = 'block';
-        if(id.toUpperCase() === 'EX2026') {
-            status.innerHTML = "STATUS: <span style='color:#0f0'>IN TRANSIT - EXPECTED TOMORROW</span>";
-        } else {
-            status.innerHTML = "STATUS: <span style='color:var(--accent)'>ORDER ID NOT FOUND</span>";
-        }
-    }
+function sortData(v) {
+    ['shirts','tees','sweats'].forEach(c => {
+        if(v==='low') LIVE_DATA[c].sort((a,b)=>a.price-b.price);
+        if(v==='high') LIVE_DATA[c].sort((a,b)=>b.price-a.price);
+    });
+    renderGrids();
+}
 
-    function updateTotals() {
-        let sub = bag.reduce((a,b)=> a + (b.price * b.qty), 0);
-        document.getElementById('c-sub').innerText = `₹${sub}`;
-        if(discount > 0) {
-            document.getElementById('disc-row').style.display = 'flex';
-            document.getElementById('c-disc').innerText = `-₹${discount}`;
-        }
-        document.getElementById('c-total').innerText = `₹${sub + 150 - discount}`;
-    }
+function applyPromo() {
+    if(document.getElementById('cp-input').value.toUpperCase() === 'ESSENTIX10') {
+        discount = 500; alert('₹500 DISCOUNT APPLIED!'); updateTotals();
+    } else { alert('INVALID CODE'); }
+}
 
-    // REQUIREMENT: BAG EMPTY ON REFRESH & MAGNET BUTTONS
-    window.onload = () => {
-    bag = []; // Preserve requirement: Empty on refresh
+function trackOrder() {
+    const id = document.getElementById('track-id').value;
+    const status = document.getElementById('track-status');
+    status.style.display = 'block';
+    if(id.toUpperCase() === 'EX2026') {
+        status.innerHTML = "STATUS: <span style='color:#0f0'>IN TRANSIT - EXPECTED TOMORROW</span>";
+    } else {
+        status.innerHTML = "STATUS: <span style='color:var(--accent)'>ORDER ID NOT FOUND</span>";
+    }
+}
+
+function updateTotals() {
+    let sub = bag.reduce((a,b)=> a + (b.price * b.qty), 0);
+    document.getElementById('c-sub').innerText = `₹${sub}`;
+    if(discount > 0) {
+        document.getElementById('disc-row').style.display = 'flex';
+        document.getElementById('c-disc').innerText = `-₹${discount}`;
+    }
+    document.getElementById('c-total').innerText = `₹${sub + 150 - discount}`;
+}
+
+window.onload = () => {
+    bag = [];
     fetchArchive();
 };
 
-    function toggleMenu(s) { document.getElementById('menu-overlay').style.display = s ? 'flex' : 'none'; }
-    function toggleBag(s) { document.getElementById('bag-sidebar').classList.toggle('open', s); }
-    function toggleQV(s) { document.getElementById('qv-modal').style.display = s ? 'block' : 'none'; }
-    function toggleSG(s) { document.getElementById('sg-modal').style.display = s ? 'flex' : 'none'; }
+function toggleMenu(s) { document.getElementById('menu-overlay').style.display = s ? 'flex' : 'none'; }
+function toggleBag(s) { document.getElementById('bag-sidebar').classList.toggle('open', s); }
+function toggleQV(s) { document.getElementById('qv-modal').style.display = s ? 'block' : 'none'; }
+function toggleSG(s) { document.getElementById('sg-modal').style.display = s ? 'flex' : 'none'; }
 
-    function openQV(cat, id) {
-        const product = LIVE_DATA[cat].find(x => x._id === id);
-        cur = { ...product, qty: 1 };
-        document.getElementById('qv-img').src = cur.image;
-        document.getElementById('qv-name').innerText = cur.name;
-        document.getElementById('qv-price').innerText = `₹${cur.price}`;
-        toggleQV(true);
-    }
+function openQV(cat, id) {
+    const product = LIVE_DATA[cat].find(x => x._id === id);
+    cur = { ...product, qty: 1 };
+    document.getElementById('qv-img').src = cur.image;
+    document.getElementById('qv-name').innerText = cur.name;
+    document.getElementById('qv-price').innerText = `₹${cur.price}`;
+    toggleQV(true);
+}
 
-    function selectSize(el, s) {
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active'); cur.size = s;
-    }
+function selectSize(el, s) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active'); cur.size = s;
+}
 
-    function addToBag() {
-        if(!cur.size) { alert('CHOOSE SIZE'); return; }
-        const ex = bag.find(x => x._id === cur._id && x.size === cur.size);
-        if(ex) ex.qty++; else bag.push({...cur});
-        
-        // REQUIREMENT: PARTY POPPER
-        confetti({ 
-            particleCount: 150, 
-            origin: { y: 0.8 }, 
-            colors: ['#000', '#ff3e3e', '#ffffff'],
-            spread: 70
-        });
-        
-        updateBag(); toggleQV(false); toggleBag(true);
-    }
+function addToBag() {
+    if(!cur.size) { alert('CHOOSE SIZE'); return; }
+    const ex = bag.find(x => x._id === cur._id && x.size === cur.size);
+    if(ex) ex.qty++; else bag.push({...cur});
+    
+    confetti({ particleCount: 150, origin: { y: 0.8 }, colors: ['#000', '#ff3e3e', '#ffffff'], spread: 70 });
+    
+    updateBag(); toggleQV(false); toggleBag(true);
+}
 
-    function updateBag() {
-        document.getElementById('bag-count').innerText = bag.reduce((a,b)=>a+b.qty,0);
-        document.getElementById('bag-list').innerHTML = bag.map((it, i) => `
-            <div style="display:flex; gap:15px; padding:20px 0; border-bottom:1px solid #f0f0f0;">
-                <div style="flex:1;">
-                    <div style="font-weight:500; font-size:16px;">${it.name}</div>
-                    <div style="font-size:12px; color:#888; margin-top:2px;">SIZE: ${it.size} | PRICE: ₹${it.price}</div>
-                    <div class="qty-ctrl"><div class="qty-btn" onclick="changeQty(${i},-1)">-</div><span>${it.qty}</span><div class="qty-btn" onclick="changeQty(${i},1)">+</div></div>
-                </div>
-                <div style="font-weight:600; font-size:16px;">₹${it.price * it.qty}</div>
-            </div>`).join('');
-    }
+function updateBag() {
+    document.getElementById('bag-count').innerText = bag.reduce((a,b)=>a+b.qty,0);
+    document.getElementById('bag-list').innerHTML = bag.map((it, i) => `
+        <div style="display:flex; gap:15px; padding:20px 0; border-bottom:1px solid #f0f0f0;">
+            <div style="flex:1;">
+                <div style="font-weight:500; font-size:16px;">${it.name}</div>
+                <div style="font-size:12px; color:#888; margin-top:2px;">SIZE: ${it.size} | PRICE: ₹${it.price}</div>
+                <div class="qty-ctrl"><div class="qty-btn" onclick="changeQty(${i},-1)">-</div><span>${it.qty}</span><div class="qty-btn" onclick="changeQty(${i},1)">+</div></div>
+            </div>
+            <div style="font-weight:600; font-size:16px;">₹${it.price * it.qty}</div>
+        </div>`).join('');
+}
 
-    function changeQty(i, d) { bag[i].qty += d; if(bag[i].qty < 1) bag.splice(i, 1); updateBag(); }
+function changeQty(i, d) { bag[i].qty += d; if(bag[i].qty < 1) bag.splice(i, 1); updateBag(); }
 
-    function showCheckout() {
-        if(bag.length === 0) return;
-        toggleBag(false); 
-        document.getElementById('home-view').style.display = 'none';
-        document.getElementById('checkout-view').style.display = 'block';
-        document.getElementById('bill-items').innerHTML = bag.map(it => `<div class="bill-row"><span>${it.name} (x${it.qty})</span><span>₹${it.price * it.qty}</span></div>`).join('');
-        updateTotals();
-        window.scrollTo(0,0);
-    }
-
+function showCheckout() {
+    if(bag.length === 0) return;
+    toggleBag(false); 
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('checkout-view').style.display = 'block';
+    document.getElementById('bill-items').innerHTML = bag.map(it => `<div class="bill-row"><span>${it.name} (x${it.qty})</span><span>₹${it.price * it.qty}</span></div>`).join('');
+    updateTotals();
+    window.scrollTo(0,0);
+}
 
 async function submitOrder() {
     const formSection = document.querySelector('.form-section');
@@ -479,7 +469,7 @@ async function submitOrder() {
         pincode: inputs[2].value,      
         city: inputs[3].value,         
         address: inputs[4].value,      
-        landmark: inputs[5].value || "N/A", // Optional field [cite: 2026-01-05]
+        landmark: inputs[5].value || "N/A",
         items: bag,
         total: bag.reduce((a, b) => a + (b.price * b.qty), 0) + 150 - discount,
         status: "Pending"
@@ -497,26 +487,22 @@ async function submitOrder() {
             body: JSON.stringify(orderData)
         });
 
-        const text = await response.text();  // <-- log the body
-console.log("RAW RESPONSE:", text);
-console.log("STATUS:", response.status);
-
         if (response.ok) {
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } }); // Party Popper [cite: 2026-01-05]
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.7 } });
             alert("ORDER PLACED SUCCESSFULLY!");
-            bag = []; // Clear bag [cite: 2026-01-05]
+            bag = [];
             window.location.reload(); 
         } else {
             const errorText = await response.text();
             console.error("Server Error:", errorText);
-            alert("VAULT REJECTED THE ORDER. Check if you pushed the latest server.js to Render.");
+            alert("VAULT REJECTED THE ORDER. Check your server.");
         }
     } catch (err) {
         console.error("Connection Error:", err);
         alert("CONNECTION ERROR: Is your Render server awake?");
     }
 }
-
 </script>
+
 </body>
 </html>
