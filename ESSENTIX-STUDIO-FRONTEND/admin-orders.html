@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ESSENTIX Admin – Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            padding: 30px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+        }
+        th {
+            background: #222;
+        }
+        select {
+            background: #000;
+            color: white;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📦 ESSENTIX – Orders Dashboard</h2>
+
+<table id="orders">
+    <tr>
+        <th>Customer</th>
+        <th>Email</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+</table>
+
+<script>
+const API = "https://essentix-backend.onrender.com";
+
+const ADMIN_KEY = "essentix-secret";
+
+function loadOrders() {
+    fetch(`${API}/api/admin/orders`, {
+        headers: { "x-admin-key": ADMIN_KEY }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const table = document.getElementById("orders");
+        table.innerHTML = `
+            <tr>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        `;
+
+        data.forEach(order => {
+            table.innerHTML += `
+                <tr>
+                    <td>${order.customerName}</td>
+                    <td>${order.email}</td>
+                    <td>₹${order.total}</td>
+                    <td>
+                        <select onchange="updateStatus('${order._id}', this.value)">
+                            <option ${order.status === "Pending" ? "selected" : ""}>Pending</option>
+                            <option ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
+                            <option ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+                            <option ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td>${new Date(order.date).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+    });
+}
+
+function updateStatus(id, status) {
+    fetch(`${API}/api/admin/order-status/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": ADMIN_KEY
+        },
+        body: JSON.stringify({ status })
+    }).then(() => loadOrders());
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>
